@@ -5,3 +5,8 @@ The current setup consists of a small cluster of VMs, 2 Pop!_OS, three Ubuntu an
 If ran without a defined user in ansible.cfg, use --ask-become-pass. To limit a playbook use -l/--limit <host>, <group>.
 
 For example a typical fresh setup would merit a run of update.yml + create_user.yml + install_packages.yml.
+
+
+
+To do:
+    * Look into setting up roles
