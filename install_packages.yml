@@ -6,7 +6,6 @@
 
   - name: install packages on Pop
     apt:
-      update_cache: yes
       name: 
         - apache2
         - nala
@@ -16,7 +15,6 @@
  
   - name: install packages on Ubuntu
     apt:
-      update_cache: yes
       name:         
         - apache2
         - nala
@@ -27,10 +25,9 @@
 
   - name: install packages on Rocky
     dnf:
-      update_cache: yes
       name: 
         - httpd
-        #- btop Not available 
+        - btop
       state: latest
     when: ansible_distribution == "Rocky"
 
