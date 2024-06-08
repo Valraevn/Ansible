@@ -1,0 +1,24 @@
+---
+
+- hosts: all
+  become: true
+  tasks:
+
+  - name: remove apache2 from Pop
+    apt:
+      name: apache2
+      state: absent
+    when: ansible_distribution == "Pop!_OS"
+ 
+  - name: remove apache2 from Ubuntu
+    dnf:
+      name: apache2
+      state: absent
+    when: ansible_distribution == "Ubuntu"
+
+
+  - name: remove apache2 from Rocky
+    dnf:
+      name: httpd
+      state: absent
+    when: ansible_distribution == "Rocky"

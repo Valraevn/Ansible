@@ -1,0 +1,32 @@
+---
+
+- hosts: all
+  become: true
+  tasks:
+
+  - name: install apache2 on Pop
+    apt:
+      name: apache2
+      state: latest
+    when: ansible_distribution == "Pop!_OS"
+ 
+  - name: install apache2 on Ubuntu
+    dnf:
+      name: apache2
+      state: latest
+    when: ansible_distribution == "Ubuntu"
+
+
+  - name: install apache2 on Rocky
+    dnf:
+      name: httpd
+      state: latest
+    when: ansible_distribution == "Rocky"
+
+#RHEL does not enable services by default
+  - name: enable apache2, aka httpd
+    systemd:
+      name: httpd
+      enabled: yes
+      state: started
+    when: ansible_distribution == "Rocky"
