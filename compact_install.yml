@@ -1,0 +1,13 @@
+---
+
+- hosts: all
+  become: true
+  tasks:
+
+  - name: Install packages
+    package:      
+      name:
+        - remmina
+        - samba
+      state: absent
+      update_cache: yes

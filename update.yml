@@ -1,0 +1,16 @@
+---
+
+- hosts: all
+  become: true
+  tasks:
+  - name: install updates debian based
+    apt:
+      upgrade: dist
+      update_cache: yes
+    when: ansible_distribution in ["Pop!_OS", "Ubuntu"]
+ 
+  - name: install updated RHEL
+    dnf:
+      update_only: yes
+      update_cache: yes
+    when: ansible_distribution == "Rocky"
