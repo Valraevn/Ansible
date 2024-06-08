@@ -1,0 +1,27 @@
+---
+
+- hosts: all
+  become: true
+  tasks:
+  - name: create user
+    tags: always
+    user:
+      name: urmum
+      groups: root
+    
+  - name: add ssh key
+    tags: always
+    authorized_key:
+      user: urmum
+      key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDL1byutODyB+Ibfo/I0xwH1VaUXQXWj5GFc/KMj/9Cl tom@WIN-2QS5MS3"
+
+  - name:
+    copy:
+      src: ../user_files/sudoer_urmum
+      dest: /etc/sudoers.d/urmum
+      owner: root
+      group: root
+      mode: 0440
+      state: present
+      create_home: yes
+      shell: /bin/bash      
