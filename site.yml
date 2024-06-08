@@ -1,0 +1,50 @@
+---
+
+- hosts: web_servers
+  become: yes
+  pre_tasks:
+  
+  - name: install updates
+    tags: always
+    apt:
+      upgrade: dist
+      update_cache: yes
+    when: ansible_distribution in ["Pop!_OS", "Ubuntu"]
+  
+  - name: install updates
+    tags: always
+    dnf:
+      update_only: yes
+      update_cache: yes
+    when: ansible_distribution == "Rocky"
+
+- hosts: web_servers
+  become: true
+  tasks:
+
+  - name: install apache2 and php for Ubuntu/Pop
+    tags: apache,apache2,ubuntu,pop_os
+    apt:
+      name:
+        - apache2
+        - libapache2-mod-php
+      state: latest
+    when: ansible_distribution in ["Ubuntu", "Pop!_OS"]
+  
+  - name: install apache2 and php for Rocky
+    tags: apache,apache2,Rocky,httpd
+    dnf:
+      name:
+        - httpd
+        - php
+      state: latest
+    when: ansible_distribution == "Rocky"
+  
+  - name: copy default html file for site
+    tags: apache,apache2,httpd
+    copy:
+      src: default_site.html
+      dest: /var/www/html/index.html
+      owner: root
+      group: root
+      mode: 0644
