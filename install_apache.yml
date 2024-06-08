@@ -8,7 +8,7 @@
     apt:
       name: apache2
       state: latest
-    when: ansible_distribution == "Pop!_OS"
+    when: ansible_distribution == "Pop!_OS" #when: ansible_distrubution in ["Pop!_OS", "Ubuntu"]
  
   - name: install apache2 on Ubuntu
     apt:
