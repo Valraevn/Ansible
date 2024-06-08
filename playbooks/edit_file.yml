@@ -1,0 +1,20 @@
+---
+
+- hosts: all
+  become: yes
+  tasks:
+  - name: edit file
+    tags: apache2,httpd,rocky
+    lineinfile:
+      path: /etc/httpd/conf/httpd.conf
+      regexp: '^ServerAdmin'
+      line: ServerAdmin urmumhellageh@uranus.io
+    when: ansible_distribution == "Rocky"
+    register: httpd
+
+  - name: restart httpd
+    tags: apache2,httpd,rocky
+    service:
+      name: httpd
+      state: restarted
+    when: httpd.changed

@@ -1,0 +1,4 @@
+---
+
+- include: playbooks/update.yml
+- include: playbooks/start_services.yml

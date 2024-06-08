@@ -1,0 +1,13 @@
+---
+
+- hosts: rocky
+  become: true
+  tasks:
+
+  - name: start httpd (Rocky)
+    tags: apache2,httpd,Rocky
+    service:
+      name: httpd
+      state: started
+      enabled: yes
+    when: ansible_distribution == "Rocky"

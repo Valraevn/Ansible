@@ -9,5 +9,5 @@
       name:
         - remmina
         - samba
-      state: absent
+      state: latest
       update_cache: yes
