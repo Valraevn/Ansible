@@ -8,4 +8,4 @@ For example a typical fresh setup would merit a run of update.yml + create_user.
 
 
 
-To do: \n Look into setting up roles, \n setup host variables
+To do: Look into setting up roles and setup host variables
