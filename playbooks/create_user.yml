@@ -13,7 +13,7 @@
     tags: always
     authorized_key:
       user: urmum
-      key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDL1byutODyB+Ibfo/I0xwH1VaUXQXWj5GFc/KMj/9Cl tom@WIN-2QS5MS3"
+      key: "<ssh key>"
 
   - name:
     copy:
