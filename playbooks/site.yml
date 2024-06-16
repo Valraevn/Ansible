@@ -40,6 +40,14 @@
       state: latest
     when: ansible_distribution == "Rocky"
   
+  - name: enable and start httpd (Rocky)
+    tags: apache2,httpd,Rocky
+    service:
+      name: httpd
+      state: started
+      enabled: yes
+    when: ansible_distribution == "Rocky"
+   
   - name: copy default html file for site
     tags: apache,apache2,httpd
     copy:

@@ -9,4 +9,4 @@ For example a typical fresh setup would merit a run of update.yml + create_user.
 
 
 To do:
-    * Look into setting up roles
+    * Look into setting up users and roles
