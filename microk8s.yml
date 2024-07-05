@@ -1,0 +1,142 @@
+---
+#Define hosts
+- hosts: all
+  become: true
+  tasks:
+
+#Update
+  - name: install updates debian based
+    apt:
+      upgrade: dist
+      update_cache: yes
+    when: ansible_distribution in ["Pop!_OS", "Ubuntu"]
+ 
+  - name: install updates RHEL-based systems
+    dnf:
+      update_only: yes
+      update_cache: yes
+    when: ansible_distribution == "Rocky"
+
+#Create dirs
+  - name: Create the needed directories
+    ansible.builtin.file:
+      path: "{{ item }}"
+      state: directory
+      owner: root
+      group: root
+      mode: 0777
+    with_items:
+      - /var/mk8s-certs
+      - /var/containers/pigallery2/config
+      - /var/containers/pigallery2/db
+      - /var/containers/pigallery2/tmp
+      - /var/containers/website
+      - /NAS
+
+
+#Install packages
+  - name: Install packages  
+    package:      
+      name:
+          - ufw
+          - vim
+          - lm-sensors
+          - cockpit
+          - samba
+          - whois
+      state: latest
+      update_cache: yes
+
+#Enable services
+  - name: start cockpit
+    tags: cockpit, systemd, services
+    service:
+      name: cockpit
+      state: started
+      enabled: yes
+
+#Firewall settings
+  - name: Check UFW is disabled
+    ufw:
+      state: disabled
+
+# #Create user
+#   - name: create user
+#     tags: always
+#     user:
+#       name: mk8s
+#       groups: root
+    
+#   - name: add ssh key
+#     tags: always
+#     authorized_key:
+#       user: mk8s
+#       key: "<ssh key>"
+
+#   - name:
+#     copy:
+#       src: ../user_files/sudoer_mk8s
+#       dest: /etc/sudoers.d/mk8s
+#       owner: root
+#       group: root
+#       mode: 0440
+#       state: present
+#       create_home: yes
+#       shell: /bin/bash
+
+#The Mikrok8s bit
+  - name: Install microk8s
+    community.general.snap:
+      classic: true
+      name: "microk8s"
+
+  - name: Install kubectl
+    community.general.snap:
+      classic: true
+      name: "kubectl"
+
+  - name: Adding user to group
+    user:
+      name: mk8s
+      groups: microk8s, sudo
+      append: yes
+      create_home: yes
+  
+  - name: Generate password hash
+    command: mkpasswd -m sha-512 password
+    register: mk8s_password_hash
+
+  - name: Set password for mk8s user
+    user:
+      name: mk8s
+      password: "{{ mk8s_password_hash.stdout }}"
+
+  - name: Change kube folder ownership
+    file:
+      path: /home/mk8s/.kube
+      owner: mk8s
+      group: mk8s
+      state: directory
+
+  - name: Disable unused microk8s modules
+    command: microk8s disable ha-cluster --force
+
+  - name: Enable microk8s common modules
+    command: microk8s enable dns cert-manager ingress hostpath-storage metrics-server
+
+  # - name: Copy cert files
+  #   ansible.builtin.copy:
+  #     src: "{{ item }}"
+  #     dest: /var/mk8s-certs/
+  #     owner: root
+  #     group: root
+  #     mode: '0777'
+  #   with_items:
+  #     - /var/snap/microk8s/current/certs/ca.crt
+  #     - /var/snap/microk8s/current/certs/client.crt
+  #     - /var/snap/microk8s/current/certs/client.key
+
+
+
+
+#Thigs to add: snapshot chronjob (service?), rsync/rclone for media, certs, inject ssh keys
