@@ -44,6 +44,7 @@
           - cockpit
           - samba
           - whois
+          -docker.io
       state: latest
       update_cache: yes
 
