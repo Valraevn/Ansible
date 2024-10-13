@@ -1,0 +1,94 @@
+---
+- hosts: all
+  become: true  # Run commands as sudo
+  vars:
+    user_name: <set username here>  # User who should have full access to K3s
+
+  tasks:
+    - name: Create k3s group
+      group:
+        name: k3s
+        state: present
+
+    - name: Add the user to k3s group
+      user:
+        name: "{{ user_name }}"
+        groups: k3s
+        append: yes
+
+    - name: Install Required Dependencies (Debian based)
+      apt:
+        name: ['curl', 'sudo', 'iptables', 'ca-certificates']
+        state: present
+        update_cache: true
+      when: ansible_facts['os_family'] == "Debian"
+
+    - name: Install Required Dependencies (RedHat based)
+      yum:
+        name: ['curl', 'sudo', 'iptables', 'ca-certificates']
+        state: present
+        update_cache: true
+      when: ansible_facts['os_family'] == "RedHat"
+
+    - name: Disable Swap (Kubernetes requirement)
+      command: swapoff -a
+      become: true
+
+    - name: Remove swap entry from /etc/fstab
+      replace:
+        path: /etc/fstab
+        regexp: '(^.*swap.*$)'
+        replace: '# \1'
+      when: ansible_facts['os_family'] == "Debian" or ansible_facts['os_family'] == "RedHat"
+
+    - name: Download and install K3s (latest version)
+      shell: curl -sfL https://get.k3s.io | sh -
+      args:
+        executable: /bin/bash
+
+    - name: Modify K3s server service to set kubeconfig permissions for k3s group
+      lineinfile:
+        path: /etc/systemd/system/k3s.service
+        regexp: '^ExecStart='
+        line: 'ExecStart=/usr/local/bin/k3s server --write-kubeconfig-mode 640 --write-kubeconfig-group k3s'
+        backup: yes
+      notify: Restart K3s
+
+    - name: Ensure kubeconfig file permissions are correct
+      file:
+        path: /etc/rancher/k3s/k3s.yaml
+        owner: root
+        group: k3s
+        mode: '0640'
+
+    - name: Ensure .kube directory exists for the user
+      file:
+        path: "/home/{{ user_name }}/.kube"
+        state: directory
+        owner: "{{ user_name }}"
+        mode: "0755"
+
+    - name: Retrieve K3s Kubeconfig for user
+      copy:
+        remote_src: yes
+        src: /etc/rancher/k3s/k3s.yaml
+        dest: "/home/{{ user_name }}/.kube/config"
+        owner: "{{ user_name }}"
+        mode: "0644"
+
+    - name: Ensure k3s service is running
+      systemd:
+        name: k3s
+        state: started
+        enabled: true
+
+  handlers:
+    - name: Restart K3s
+      systemd:
+        name: k3s
+        state: restarted
+        daemon_reload: yes
+
+    - name: Reload systemd daemon after unit file changes
+      systemd:
+        daemon_reload: yes
